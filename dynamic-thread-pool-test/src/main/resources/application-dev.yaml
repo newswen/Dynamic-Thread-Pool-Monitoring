@@ -1,0 +1,19 @@
+#线程池配置
+thread:
+  pool:
+    executor:
+      core-pool-size: 20
+      max-pool-size: 20
+      keep-alive-time: 60
+      block-queue-size: 200
+      reject-policy: AbortPolicy
+
+#动态线程池连接注册中心配置
+dynamic:
+  thread:
+    pool:
+      config:
+        host: 116.205.112.70
+        port: 6379
+        password: 123456
+
