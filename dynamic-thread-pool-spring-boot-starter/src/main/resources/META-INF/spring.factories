@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration = com.yw.sdk.config.DynamicThreadPoolAutoConfig
+org.springframework.boot.autoconfigure.EnableAutoConfiguration = com.yw.sdk.config.DynamicThreadPoolAutoConfig,com.yw.sdk.config.RedissonClientConfig,com.yw.sdk.config.NacosClientConfig

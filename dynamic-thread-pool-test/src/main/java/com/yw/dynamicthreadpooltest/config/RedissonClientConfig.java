@@ -1,11 +1,10 @@
-package com.yw.dynamicthreadpooladmin.config;
+package com.yw.dynamicthreadpooltest.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class RedissonClientConfig {
 
-    //matchIfMissing = false,如果未填写配置，默认为不注入当前bean
     @Bean("redissonClient")
     public RedissonClient redissonClient(ConfigurableApplicationContext applicationContext, RedissonClientConfigProperties properties) {
         Config config = new Config();

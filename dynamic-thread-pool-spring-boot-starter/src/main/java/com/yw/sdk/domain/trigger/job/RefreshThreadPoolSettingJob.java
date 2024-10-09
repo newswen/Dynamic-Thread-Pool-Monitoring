@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
+
 import java.util.List;
 
 /**
@@ -23,20 +24,20 @@ public class RefreshThreadPoolSettingJob {
 
     private final IDynamicThreadPoolService dynamicThreadPoolService;
 
-    private final IRegister redissonRegister;
+    private final IRegister register;
 
-    public RefreshThreadPoolSettingJob(IDynamicThreadPoolService dynamicThreadPoolService, IRegister redissonRegister) {
+    public RefreshThreadPoolSettingJob(IDynamicThreadPoolService dynamicThreadPoolService, IRegister register) {
         this.dynamicThreadPoolService = dynamicThreadPoolService;
-        this.redissonRegister = redissonRegister;
+        this.register = register;
     }
 
     @Scheduled(cron = "0/10 * * * * ?")
     public void refreshThreadPoolSettings() {
         List<ThreadPoolConfigEntity> threadPoolConfigEntityList = dynamicThreadPoolService.getThreadPoollConfigList();
-        redissonRegister.registerThreadPoolConfigList(threadPoolConfigEntityList);
+        register.registerThreadPoolConfigList(threadPoolConfigEntityList);
         logger.info("动态线程池，上报线程池信息：{}", JSON.toJSONString(threadPoolConfigEntityList));
         threadPoolConfigEntityList.forEach(threadPoolConfigEntity -> {
-            redissonRegister.registerThreadPoolConfig(threadPoolConfigEntity);
+            register.registerThreadPoolConfig(threadPoolConfigEntity);
             logger.info("动态线程池，上报线程池配置：{}", JSON.toJSONString(threadPoolConfigEntity));
         });
     }

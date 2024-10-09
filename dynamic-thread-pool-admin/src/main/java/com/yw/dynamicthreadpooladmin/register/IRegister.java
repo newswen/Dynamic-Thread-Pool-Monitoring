@@ -1,4 +1,4 @@
-package com.yw.sdk.domain.register;
+package com.yw.dynamicthreadpooladmin.register;
 
 import com.alibaba.nacos.api.exception.NacosException;
 import com.yw.sdk.domain.model.entity.ThreadPoolConfigEntity;

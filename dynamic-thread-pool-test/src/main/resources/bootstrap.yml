@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: dynamic-thread-pool
+  profiles:
+    #不配置active的话会选择项目名称
+    active: dev
+

@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @description 动态线程池配置
  * @create 2024-05-12 16:23
  */
-@ConfigurationProperties(prefix = "dynamic.thread.pool.config", ignoreInvalidFields = true)
-public class DynamicThreadPoolAutoProperties {
+@ConfigurationProperties(prefix = "dynamic.thread.pool.config.redis", ignoreInvalidFields = true)
+public class RedissonClientConfigProperties {
 
     /** 状态；open = 开启、close 关闭 */
     private boolean enable;

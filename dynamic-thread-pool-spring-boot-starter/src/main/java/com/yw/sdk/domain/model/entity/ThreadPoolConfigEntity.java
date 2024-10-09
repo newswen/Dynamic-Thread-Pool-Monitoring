@@ -63,12 +63,20 @@ public class ThreadPoolConfigEntity {
         this.threadPoolName = threadPoolName;
     }
 
+    public String getThreadPoolName() {
+        return threadPoolName;
+    }
+
+    public void setThreadPoolName(String threadPoolName) {
+        this.threadPoolName = threadPoolName;
+    }
+
     public String getAppName() {
         return appName;
     }
 
-    public String getThreadPoolName() {
-        return threadPoolName;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public int getCorePoolSize() {
@@ -126,5 +134,4 @@ public class ThreadPoolConfigEntity {
     public void setRemainingCapacity(int remainingCapacity) {
         this.remainingCapacity = remainingCapacity;
     }
-
 }

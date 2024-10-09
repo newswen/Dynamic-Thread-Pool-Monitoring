@@ -1,10 +1,12 @@
-package com.yw.dynamicthreadpooladmin.config;
+package com.yw.sdk.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -19,11 +21,15 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(RedissonClientConfigProperties.class)
-@Slf4j
 public class RedissonClientConfig {
 
-    //matchIfMissing = false,如果未填写配置，默认为不注入当前bean
+
+    private final Logger logger = LoggerFactory.getLogger(RedissonClientConfig.class);
+
     @Bean("redissonClient")
+    //matchIfMissing = false,如果未填写配置，默认为不注入当前bean
+    @ConditionalOnProperty(value = "dynamic.thread.pool.config.redis.enable", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnMissingBean
     public RedissonClient redissonClient(ConfigurableApplicationContext applicationContext, RedissonClientConfigProperties properties) {
         Config config = new Config();
         // 根据需要可以设定编解码器；https://github.com/redisson/redisson/wiki/4.-%E6%95%B0%E6%8D%AE%E5%BA%8F%E5%88%97%E5%8C%96
@@ -43,7 +49,7 @@ public class RedissonClientConfig {
         ;
         RedissonClient redissonClient = Redisson.create(config);
         //redissonClient.isShutdown()是检测redis客户端是否关闭了
-        log.info("动态线程池，注册器（redis）链接初始化完成。{} {} {}", properties.getHost(), properties.getPoolSize(), !redissonClient.isShutdown());
+        logger.info("动态线程池，注册器（redis）链接初始化完成。{} {} {}", properties.getHost(), properties.getPoolSize(), !redissonClient.isShutdown());
 
         return redissonClient;
     }

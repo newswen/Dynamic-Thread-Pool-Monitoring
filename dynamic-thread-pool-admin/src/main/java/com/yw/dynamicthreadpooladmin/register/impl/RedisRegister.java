@@ -1,18 +1,17 @@
-package com.yw.sdk.domain.register.redis;
+package com.yw.dynamicthreadpooladmin.register.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.yw.dynamicthreadpooladmin.register.IRegister;
+import com.yw.dynamicthreadpooladmin.types.RedisRegistryEnum;
 import com.yw.sdk.domain.model.entity.ThreadPoolConfigEntity;
-import com.yw.sdk.domain.model.valobj.RegistryEnumVO;
-import com.yw.sdk.domain.register.IRegister;
-import javafx.application.Application;
 import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -23,6 +22,8 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author: yuanwen
  * @since: 2024/9/18
  */
+@Service
+@ConditionalOnProperty(value = "dynamic.thread.pool.config.redis.enable", havingValue = "true", matchIfMissing = false)
 public class RedisRegister implements IRegister {
 
     private Logger logger = LoggerFactory.getLogger(RedisRegister.class);
@@ -43,7 +44,7 @@ public class RedisRegister implements IRegister {
         if (threadPoolConfigEntityList == null || threadPoolConfigEntityList.isEmpty()) {
             return;
         }
-        RList<ThreadPoolConfigEntity> list = redissonClient.getList(RegistryEnumVO.THREAD_POOL_CONFIG_LIST_KEY.getKey() + ":" + threadPoolConfigEntityList.get(0).getAppName());
+        RList<ThreadPoolConfigEntity> list = redissonClient.getList(RedisRegistryEnum.THREAD_POOL_CONFIG_LIST_KEY.getKey() + ":" + threadPoolConfigEntityList.get(0).getAppName());
         //这里为了避免每一次注册都会叠加，导致重复出现，每次注册都进行清空操作
         //9-23重构为主键+:+应用服务名，每一个应用服务对其线程池配置进行单独清空
         list.clear();
@@ -57,7 +58,7 @@ public class RedisRegister implements IRegister {
      */
     @Override
     public void registerThreadPoolConfig(ThreadPoolConfigEntity threadPoolConfigEntity) {
-        String key = RegistryEnumVO.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + threadPoolConfigEntity.getAppName() + "_" + threadPoolConfigEntity.getThreadPoolName();
+        String key = RedisRegistryEnum.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + threadPoolConfigEntity.getAppName() + "_" + threadPoolConfigEntity.getThreadPoolName();
         RBucket<ThreadPoolConfigEntity> bucket = redissonClient.getBucket(key);
         //并设置过期时间为30天
         bucket.set(threadPoolConfigEntity, Duration.ofDays(30));
@@ -70,7 +71,7 @@ public class RedisRegister implements IRegister {
      */
     @Override
     public void updateThreadPoolConfig(ThreadPoolConfigEntity threadPoolConfigEntity) {
-        String key = RegistryEnumVO.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + threadPoolConfigEntity.getAppName() + "_" + threadPoolConfigEntity.getThreadPoolName();
+        String key = RedisRegistryEnum.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + threadPoolConfigEntity.getAppName() + "_" + threadPoolConfigEntity.getThreadPoolName();
         if (redissonClient.getBucket(key).isExists()) {
             RBucket<ThreadPoolConfigEntity> bucket = redissonClient.getBucket(key);
             //并设置过期时间为30天
@@ -85,7 +86,7 @@ public class RedisRegister implements IRegister {
         //这里是为了防止服务重启，导致之前的线程池配置又回到初始yaml配置了
         //对线程池Map进行获取打印
         for (String threadPoolName : threadPoolExecutorMap.keySet()) {
-            String redisKey = RegistryEnumVO.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + applicationName + "_" + threadPoolName;
+            String redisKey = RedisRegistryEnum.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + applicationName + "_" + threadPoolName;
             ThreadPoolConfigEntity threadPoolConfigEntity = redissonClient.<ThreadPoolConfigEntity>getBucket(redisKey).get();
             if (threadPoolConfigEntity != null) {
                 ThreadPoolExecutor oldThreadPoolConfigEntity = threadPoolExecutorMap.get(threadPoolName);
@@ -101,7 +102,7 @@ public class RedisRegister implements IRegister {
         try {
             List<ThreadPoolConfigEntity> threadPoolConfigEntityList = new ArrayList<>();
             RKeys keys = redissonClient.getKeys();
-            for (String key : keys.getKeysByPattern(RegistryEnumVO.THREAD_POOL_CONFIG_LIST_KEY.getKey() + ":*")) {
+            for (String key : keys.getKeysByPattern(RedisRegistryEnum.THREAD_POOL_CONFIG_LIST_KEY.getKey() + ":*")) {
                 threadPoolConfigEntityList.addAll(redissonClient.<ThreadPoolConfigEntity>getList(key).readAll());
             }
             return threadPoolConfigEntityList;
@@ -114,7 +115,7 @@ public class RedisRegister implements IRegister {
     @Override
     public ThreadPoolConfigEntity queryThreadPoolConfig(String appName, String threadPoolName) {
         try {
-            String key = RegistryEnumVO.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + appName + "_" + threadPoolName;
+            String key = RedisRegistryEnum.THREAD_POOL_CONFIG_PARAMETER_LIST_KEY.getKey() + "_" + appName + "_" + threadPoolName;
             RBucket<ThreadPoolConfigEntity> bucket = redissonClient.getBucket(key);
             return bucket.get();
         } catch (Exception e) {
@@ -126,7 +127,7 @@ public class RedisRegister implements IRegister {
     @Override
     public Boolean updateThreadPoolConfigByAdmin(ThreadPoolConfigEntity request) {
         try {
-            RTopic rTopic = redissonClient.getTopic(RegistryEnumVO.DYNAMIC_THREAD_POOL_REDIS_TOPIC.getKey() + "_" + request.getAppName());
+            RTopic rTopic = redissonClient.getTopic(RedisRegistryEnum.DYNAMIC_THREAD_POOL_REDIS_TOPIC.getKey() + "_" + request.getAppName());
             rTopic.publish(request);
             logger.info("修改线程池配置成功,线程池配置：{}", JSON.toJSONString(request));
             return true;

@@ -1,0 +1,15 @@
+#${spring.cloud.nacos.config.prefix}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}
+spring:
+  cloud:
+    nacos:
+      #配置中心
+      config:
+        server-addr: 116.205.112.70:8848
+        #没有后缀名报错
+        file-extension: yml
+        username: nacos
+        password: nacos
+        namespace: 110af76d-afc3-4ad7-bd47-b793e5f305f3
+        shared-configs:
+          - data-id: redis.yml
+            refresh: true
